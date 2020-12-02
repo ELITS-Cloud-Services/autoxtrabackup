@@ -79,7 +79,10 @@ usage () {
                 sendEmail=never
 
                 # Send to which e-mail address
-                emailAddress=";
+                emailAddress=
+                
+                # Port to use for MySQL connection
+                mysqlPort=";
         echo
         echo -e " Restore a full backup";
         echo -e "\tRestore a compressed backup:";
@@ -107,7 +110,7 @@ usage () {
         echo -e "\t9: Follow the same steps as for a full backup restore now";
 }
 
-while getopts ":hv" opt; do
+while getopts ":hvc:" opt; do
   case $opt in
         h)
                 usage;
@@ -116,15 +119,21 @@ while getopts ":hv" opt; do
         v)
                 set -x;
                 ;;
+        c)
+                config=$OPTARG
+                ;;
         \?)
                 echo "Invalid option: -$OPTARG" >&2
                 exit 1
                 ;;
+        :)
+                echo "Invalid option: $OPTARG requires an argument" 1>&2
+                ;;
   esac
 done
 
-if [ -f /etc/default/autoxtrabackup ] ; then
-        . /etc/default/autoxtrabackup
+if [ -f $config ] ; then
+        . $config
 else
         echo -e " \"$0 -h\" for help on configuring"
         exit 1
