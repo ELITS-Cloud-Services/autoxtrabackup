@@ -9,21 +9,6 @@
 #
 # Version: 0.3 beta
 
-backupDir=/var/backup
-mounttype=nfs
-nfsmountpoint=/var/backup
-incrtype=full
-tmpDir=/tmp
-hoursBeforeFull=167
-hoursBeforeInc=23
-compression=true
-keepDays=7
-keepWeeks=5
-keepMonths=4
-sendEmail=never
-emailAddress=
-backupLog=$tmpDir/autoxtrabackup.log
-
 #####
 # No editing should be required below this line
 #####
@@ -238,7 +223,7 @@ if [ $tomorrow -eq 1 ]; then
 
         # Check if we must take a full or incremental backup
         if [ $difference -gt $hoursBeforeFull ]; then
-                /usr/bin/innobackupex --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --tmpdir=$tmpDir --rsync "$monthlyDir"/"$dateNow" > $backupLog 2>&1
+                /usr/bin/innobackupex --host=127.0.0.1 --port=$mysqlPort --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --tmpdir=$tmpDir --rsync "$monthlyDir"/"$dateNow" > $backupLog 2>&1
 
                 echo $dateNowUnix > "$monthlyDir"/last_monthly
 
@@ -265,7 +250,7 @@ elif [ $weekTomorrow == $weekNext ]; then
 
         # Check if we must take a full or incremental backup
         if [ $difference -gt $hoursBeforeFull ]; then
-                /usr/bin/innobackupex --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --tmpdir=$tmpDir --rsync "$weeklyDir"/"$dateNow" > $backupLog 2>&1
+                /usr/bin/innobackupex --host=127.0.0.1 --port=$mysqlPort --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --tmpdir=$tmpDir --rsync "$weeklyDir"/"$dateNow" > $backupLog 2>&1
                 echo $dateNowUnix > "$weeklyDir"/last_weekly
 
                 # Copy to daily
@@ -294,15 +279,15 @@ else
                 lastFullDir=`date -d@"$lastFull" '+%Y-%m-%d_%H-%M-%S'`
                 lastIncrDir=`date -d@"$lastInc" '+%Y-%m-%d_%H-%M-%S'`
 		if [[ $incrtype == full ]]; then
-			/usr/bin/innobackupex --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --rsync --tmpdir=$tmpDir --incremental --incremental-basedir="$dailyDir"/"$lastFullDir"_full "$dailyDir"/"$dateNow"_incr > $backupLog 2>&1
+			/usr/bin/innobackupex --host=127.0.0.1 --port=$mysqlPort --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --rsync --tmpdir=$tmpDir --incremental --incremental-basedir="$dailyDir"/"$lastFullDir"_full "$dailyDir"/"$dateNow"_incr > $backupLog 2>&1
 		else
-			/usr/bin/innobackupex --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --rsync --tmpdir=$tmpDir --incremental --incremental-basedir="$dailyDir"/"$lastIncrDir"_incr "$dailyDir"/"$dateNow"_incr > $backupLog 2>&1
+			/usr/bin/innobackupex --host=127.0.0.1 --port=$mysqlPort --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --rsync --tmpdir=$tmpDir --incremental --incremental-basedir="$dailyDir"/"$lastIncrDir"_incr "$dailyDir"/"$dateNow"_incr > $backupLog 2>&1
 		fi
                 echo $dateNowUnix > "$dailyDir"/latest_incremental
         elif [ $differenceFull -gt $hoursBeforeFull ]; then
                 #echo "It's been $difference hours since last full backup, time for a new full backup"
                 echo $dateNowUnix > "$dailyDir"/latest_full
-                /usr/bin/innobackupex --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --tmpdir=$tmpDir --rsync "$dailyDir"/"$dateNow"_full > $backupLog 2>&1
+                /usr/bin/innobackupex --host=127.0.0.1 --port=$mysqlPort --user=$mysqlUser --password=$mysqlPwd --no-timestamp $compress $compressThreads --tmpdir=$tmpDir --rsync "$dailyDir"/"$dateNow"_full > $backupLog 2>&1
 	else
 		echo "It has not been long enough since the last incremental backup, nothing done"
         fi
